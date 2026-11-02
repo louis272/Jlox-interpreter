@@ -1,10 +1,5 @@
 package com.craftinginterpreters.lox;
 
-import com.craftinginterpreters.lox.Expr.Assign;
-import com.craftinginterpreters.lox.Expr.Call;
-import com.craftinginterpreters.lox.Expr.Logical;
-import com.craftinginterpreters.lox.Expr.Variable;
-
 class AstPrinter implements Expr.Visitor<String> {
     String print(Expr expr) {
         return expr.accept(this);
@@ -45,22 +40,22 @@ class AstPrinter implements Expr.Visitor<String> {
     }
 
     @Override
-    public String visitVariableExpr(Variable expr) {
+    public String visitVariableExpr(Expr.Variable expr) {
         return expr.name.lexeme;
     }
 
     @Override
-    public String visitAssignExpr(Assign expr) {
+    public String visitAssignExpr(Expr.Assign expr) {
         return parenthesize("= " + expr.name.lexeme, expr.value);
     }
 
     @Override
-    public String visitLogicalExpr(Logical expr) {
+    public String visitLogicalExpr(Expr.Logical expr) {
         return parenthesize(expr.operator.lexeme, expr.left, expr.right);
     }
 
     @Override
-    public String visitCallExpr(Call expr) {
+    public String visitCallExpr(Expr.Call expr) {
         StringBuilder builder = new StringBuilder();
 
         builder.append(expr.callee.accept(this));
@@ -72,5 +67,33 @@ class AstPrinter implements Expr.Visitor<String> {
         builder.append(")");
 
         return builder.toString();
+    }
+
+    @Override
+    public String visitGetExpr(Expr.Get expr) {
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("(.").append(" ");
+        builder.append(expr.object.accept(this)).append(" ");
+        builder.append(expr.name.lexeme).append(")");
+        
+        return builder.toString();
+    }
+
+    @Override
+    public String visitSetExpr(Expr.Set expr) {
+        StringBuilder builder = new StringBuilder();
+        
+        builder.append("(set ");
+        builder.append(expr.object.accept(this)).append(" ");
+        builder.append(expr.name.lexeme).append(" ");
+        builder.append(expr.value.accept(this)).append(")");
+        
+        return builder.toString();
+    }
+
+    @Override
+    public String visitThisExpr(Expr.This expr) {
+        return "this";
     }
 }
